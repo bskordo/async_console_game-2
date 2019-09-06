@@ -43,19 +43,19 @@ async def fire(canvas, start_row, start_column, rows_speed=-0.3, columns_speed=0
         column += columns_speed
 
 
-def correct_row(max_available_row, current_row, row_frame):
+def correct_row(max_available_row, current_row, frame_rows_number ):
     corrected_row = current_row
-    if current_row >= max_available_row - row_frame:
-        corrected_row = max_available_row - row_frame - 1
+    if current_row >= max_available_row - frame_rows_number :
+        corrected_row = max_available_row - frame_rows_number  - 1
     elif current_row <= 0:
         corrected_row = 1
     return corrected_row
 
 
-def correct_column(max_available_column, current_column, column_frame):
+def correct_column(max_available_column, current_column, frame_columns_number):
     corrected_column = current_column
-    if current_column > max_available_column - column_frame:
-        corrected_column = max_available_column - (column_frame + 1)
+    if current_column > max_available_column - frame_columns_number:
+        corrected_column = max_available_column - (frame_columns_number + 1)
     elif current_column <= 1:
         corrected_column = 1
     return corrected_column
@@ -92,7 +92,7 @@ async def run_spaceship(canvas):
 
     while True:
         current_year = year.get('current_year')
-        row_frame, column_frame = get_frame_size(spaceship_frame)
+        frame_rows_number, frame_columns_number = get_frame_size(spaceship_frame)
 
         prev_sprite_row, prev_sprite_column = row, column
         prev_spaceship_frame = spaceship_frame
@@ -107,8 +107,8 @@ async def run_spaceship(canvas):
             column_for_fire = column+2
             fire_animation = fire(canvas, row, column_for_fire, rows_speed=FIRE_SPEED)
             coroutines.append(fire_animation)
-        row = correct_row(max_available_row, row, row_frame)
-        column = correct_column(max_available_column, column, column_frame)
+        row = correct_row(max_available_row, row, frame_rows_number)
+        column = correct_column(max_available_column, column, frame_columns_number)
         for obstacle in obstacles:
             if obstacle.has_collision(row, column):
                 draw_frame(canvas, prev_sprite_row, prev_sprite_column, prev_spaceship_frame, negative=True)

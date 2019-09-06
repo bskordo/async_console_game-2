@@ -83,7 +83,7 @@ async def fill_orbit_with_garbage(canvas):
         coroutines.append(garbage)
 
 
-async def change_year_data(canvas):
+async def run_scenario(canvas):
     global year
     max_y, max_x = get_terminal_size()
 
@@ -108,7 +108,7 @@ def main(canvas, frames):
     global year
 
     curses.curs_set(False)
-    year_change = change_year_data(canvas)
+    year_change = run_scenario(canvas)
     coroutines.append(year_change)
     spaceship_frame = animate_spaceship(frames)
     coroutines.append(spaceship_frame)
@@ -124,7 +124,7 @@ def main(canvas, frames):
                 coro.send(None)
             except StopIteration:
                 coroutines.remove(coro)
-            canvas.refresh()
+        canvas.refresh()
         time.sleep(TIC_TIMEOUT)
 
 
