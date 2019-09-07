@@ -14,7 +14,8 @@ SPACESHIP_SPEED = 2
 STARS_COUNT = 80
 FIRE_SPEED = -3
 TIC_TIMEOUT = 0.1
-CHANGE_YEAR_DELAY = 20
+YEAR_DURATION = 20
+BORDER_MARGIN = 1
 
 
 async def sleep(tics=0):
@@ -50,8 +51,8 @@ def get_stars(canvas, stars_count=80):
     max_y, max_x = get_terminal_size()
     for _ in range(0, stars_count):
         symbol = random.choice('+*.:')
-        y_coord = random.randint(1, max_y - 1)
-        x_coord = random.randint(1, max_x - 1)
+        y_coord = random.randint(1, max_y - BORDER_MARGIN)
+        x_coord = random.randint(1, max_x - BORDER_MARGIN)
         star = blink(canvas, y_coord, x_coord, symbol)
         stars.append(star)
     return stars
@@ -59,14 +60,14 @@ def get_stars(canvas, stars_count=80):
 
 def get_fire(canvas):
     max_y, max_x = get_terminal_size()
-    return fire(canvas, max_y - 11, round(max_x / 2) + 2, rows_speed=FIRE_SPEED)
+    return fire(canvas, max_y - BORDER_MARGIN, round(max_x / 2) + 2, rows_speed=FIRE_SPEED)
 
 
 def get_trash(canvas):
     garbages = get_garbages()
     garbage = random.choice(garbages)
     _, max_x = get_terminal_size()
-    columns = max_x - 1
+    columns = max_x - BORDER_MARGIN
     column_for_trash = random.randint(1, columns)
     return fly_garbage(canvas, column_for_trash, garbage)
 
@@ -90,16 +91,16 @@ async def run_scenario(canvas):
     while True:
         current_year = year.get('current_year')
         previous_message = get_message(current_year-1)
-        draw_frame(canvas, round(max_y - 2), round(2), str(previous_message), negative=True)
+        draw_frame(canvas, round(max_y - BORDER_MARGIN), round(2), str(previous_message), negative=True)
         message = get_message(current_year)
-        draw_frame(canvas, round(max_y - 2), round(2), str(message))
+        draw_frame(canvas, round(max_y - BORDER_MARGIN), round(2), str(message))
         if current_year == 1961:
             orbit_with_garbage = fill_orbit_with_garbage(canvas)
             coroutines.append(orbit_with_garbage)
         if current_year == 2020:
             fire_animation = get_fire(canvas)
             coroutines.append(fire_animation)
-        await sleep(CHANGE_YEAR_DELAY)
+        await sleep(YEAR_DURATION)
         year['current_year'] += 1
 
 
@@ -108,6 +109,7 @@ def main(canvas, frames):
     global year
 
     curses.curs_set(False)
+    canvas.nodelay(True)
     year_change = run_scenario(canvas)
     coroutines.append(year_change)
     spaceship_frame = animate_spaceship(frames)
@@ -125,6 +127,7 @@ def main(canvas, frames):
             except StopIteration:
                 coroutines.remove(coro)
         canvas.refresh()
+
         time.sleep(TIC_TIMEOUT)
 
 

@@ -96,7 +96,6 @@ async def run_spaceship(canvas):
 
         prev_sprite_row, prev_sprite_column = row, column
         prev_spaceship_frame = spaceship_frame
-        canvas.nodelay(True)
         row_pos, column_pos, space = read_controls(canvas)
 
         row_speed, column_speed = update_speed(row_speed, column_speed, row_pos, column_pos)
@@ -123,7 +122,6 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.8):
     global obstacles
     """Animate garbage, flying from top to bottom. Сolumn position will stay same, as specified on start."""
     rows_number, columns_number = canvas.getmaxyx()
-
     column = max(column, 0)
     column = min(column, columns_number - 1)
     row = 0
@@ -131,21 +129,22 @@ async def fly_garbage(canvas, column, garbage_frame, speed=0.8):
     obstacle = Obstacle(row, column, rows, columns)
     obstacles.append(obstacle)
     canvas.addstr('')
-    while row < rows_number:
-        draw_frame(canvas, row, column, garbage_frame)
-        obstacle.row = row
+    try:
+        while row < rows_number:
+            draw_frame(canvas, row, column, garbage_frame)
+            obstacle.row = row
 
-        await asyncio.sleep(0)
+            await asyncio.sleep(0)
 
-        draw_frame(canvas, row, column, garbage_frame, negative=True)
-        row += speed
-        obstacle.row += speed
-        if obstacle in obstacles_in_last_collisions:
-            explode_row = row + (rows/2)
-            explode_column = column + (columns/2)
-            await explode(canvas, explode_row, explode_column)
-            obstacles.remove(obstacle)
-            return
-    obstacles.remove(obstacle)
-
+            draw_frame(canvas, row, column, garbage_frame, negative=True)
+            row += speed
+            obstacle.row += speed
+            if obstacle in obstacles_in_last_collisions:
+                explode_row = row + (rows/2)
+                explode_column = column + (columns/2)
+                obstacles_in_last_collisions.remove(obstacle)
+                await explode(canvas, explode_row, explode_column)
+        
+    finally:
+        obstacles.remove(obstacle)
 
